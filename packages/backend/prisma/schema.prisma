@@ -1,0 +1,155 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String      @id @default(cuid())
+  phone         String      @unique
+  username      String      @unique
+  publicKey     String
+  displayName   String?
+  avatarUrl     String?
+  password      String?     // Хеш пароля
+  pushToken     String?     // Для уведомлений
+  onlineStatus  String?     @default("offline") // Исправлено имя поля!
+  lastSeenAt    DateTime?   @default(now())
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  // Связи (реальные имена из вашего кода)
+  sentMessages    Message[]         @relation("SentMessages")
+  receivedMessages Message[]        @relation("ReceivedMessages")
+  chatMessages    ChatMessage[]
+  ownedMotes      NexusMote[]
+  privacy         PrivacySetting[]
+  bots            Bot[]
+  reactions       MessageReaction[]
+  inviteLinks     InviteLink[]
+  createdChats    Chat[]            @relation("ChatCreator")
+  chatUsers       Chat[]            @relation("ChatUsers")
+  chatMembers     ChatMember[]
+  email           String?           @unique
+  bio             String?
+}
+
+model Message {
+  id          String   @id @default(cuid())
+  content     String
+  senderId    String
+  receiverId  String
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  sender   User @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  reactions MessageReaction[]
+  chatId   String?
+  isDeleted Boolean @default(false)
+  deletedAt DateTime?
+  editedAt DateTime?
+  text     String?
+  attachments String[]
+}
+
+model Chat {
+  id        String   @id @default(cuid())
+  name      String?
+  isGroup   Boolean  @default(false)
+  creatorId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  creator User   @relation("ChatCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  users   User[] @relation("ChatUsers")
+  messages ChatMessage[]
+  invites InviteLink[]
+  members ChatMember[]
+  type    String @default("PRIVATE")
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  content   String
+  senderId  String
+  chatId    String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sender User @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  chat   Chat @relation(fields: [chatId], references: [id], onDelete: Cascade)
+}
+
+// Вспомогательные модели (если они есть в проекте)
+model NexusMote {
+  id        String   @id @default(cuid())
+  name      String
+  ownerId   String
+  createdAt DateTime @default(now())
+
+  owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+}
+
+model PrivacySetting {
+  id        String   @id @default(cuid())
+  userId    String
+  setting   String
+  value     String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Bot {
+  id        String   @id @default(cuid())
+  name      String
+  ownerId   String
+  token     String
+  createdAt DateTime @default(now())
+
+  owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+}
+
+model MessageReaction {
+  id        String   @id @default(cuid())
+  messageId String
+  userId    String
+  emoji     String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId, emoji])
+}
+
+model InviteLink {
+  id        String   @id @default(cuid())
+  chatId    String
+  creatorId String
+  token     String   @unique
+  expiresAt DateTime?
+  createdAt DateTime @default(now())
+
+  chat    Chat @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  creator User @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+}
+
+model ChatMember {
+  id        String   @id @default(cuid())
+  chatId    String
+  userId    String
+  role      String   @default("member")
+  joinedAt DateTime @default(now())
+
+  chat Chat @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([chatId, userId])
+}
