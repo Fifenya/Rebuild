@@ -8,13 +8,14 @@ import { JwtStrategy } from './jwt.strategy';
 
 @Module({
   imports: [
+    ConfigModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        secret: config.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: config.get<string>('JWT_EXPIRES_IN', '7d') },
+        secret: config.get<string>('JWT_ACCESS_SECRET') || config.get<string>('JWT_SECRET'),
+        signOptions: { expiresIn: config.get<string>('JWT_ACCESS_EXPIRES', '15m') },
       }),
     }),
   ],
