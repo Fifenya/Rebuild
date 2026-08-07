@@ -24,6 +24,7 @@ publish:
   owner: Fifenya
   repo: Rebuild
   releaseType: release
+  channel: latest
 
 win:
   target:
@@ -48,10 +49,18 @@ linux:
   icon: assets/icon.png
   category: Network;Chat;InstantMessaging
   artifactName: "Nexus-${version}-${arch}.${ext}"
+  maintainer: "Nexus Team <nexus@example.com>"
+  vendor: "Nexus Team"
+  synopsis: Secure messenger
+  description: |
+    Nexus — кроссплатформенный защищённый мессенджер
+    с поддержкой мгновенных сообщений, голосовых, файлов и Nexus Motes.
   desktop:
     Name: Nexus
     Comment: Secure messenger
     Categories: Network;Chat;InstantMessaging;
+    StartupWMClass: nexus-desktop
+    Terminal: false
 
 mac:
   target:
