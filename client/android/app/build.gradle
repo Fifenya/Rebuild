@@ -2,9 +2,7 @@ apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
 
-
 def enableProguardInReleaseBuilds = false
-def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
 
 android {
     ndkVersion rootProject.ext.ndkVersion
@@ -20,30 +18,14 @@ android {
         versionName "1.0"
     }
     signingConfigs {
-        debug {
-            storeFile file('debug.keystore')
-            storePassword 'android'
-            keyAlias 'androiddebugkey'
-            keyPassword 'android'
-        }
+        debug { storeFile file('debug.keystore'); storePassword 'android'; keyAlias 'androiddebugkey'; keyPassword 'android' }
     }
     buildTypes {
-        debug {
-            signingConfig signingConfigs.debug
-        }
-        release {
-            signingConfig signingConfigs.debug
-            minifyEnabled enableProguardInReleaseBuilds
-            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
-        }
+        debug { signingConfig signingConfigs.debug }
+        release { signingConfig signingConfigs.debug; minifyEnabled enableProguardInReleaseBuilds; proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro" }
     }
 }
-
 dependencies {
     implementation("com.facebook.react:react-android")
-    if (hermesEnabled.toBoolean()) {
-        implementation("com.facebook.react:hermes-android")
-    } else {
-        implementation jscFlavor
-    }
+    if (hermesEnabled.toBoolean()) { implementation("com.facebook.react:hermes-android") }
 }
