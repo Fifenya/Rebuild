@@ -35,7 +35,7 @@ export const useAuthStore = create<AuthState>()(
         if (token) {
           api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
           // Проверяем валидность токена
-          api.get('/users/me')
+          api.get('/auth/me')
             .then((res) => {
               set({ user: res.data, isAuthenticated: true, isLoading: false });
             })
