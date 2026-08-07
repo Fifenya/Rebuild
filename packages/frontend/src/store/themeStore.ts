@@ -59,9 +59,18 @@ interface ThemeState {
   resetTheme: () => void;
 }
 
+// Применяем CSS переменные к DOM
+function applyThemeToDOM(theme: Theme) {
+  const root = document.documentElement;
+  Object.entries(theme.colors).forEach(([key, value]) => {
+    const cssVar = `--color-${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`;
+    root.style.setProperty(cssVar, value);
+  });
+}
+
 export const useThemeStore = create<ThemeState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       currentTheme: NEXUS_DARK_THEME,
       
       setTheme: (theme) => {
@@ -83,15 +92,15 @@ export const useThemeStore = create<ThemeState>()(
         set({ currentTheme: NEXUS_DARK_THEME });
       },
     }),
-    { name: 'nexus-theme' }
+    { 
+      name: 'nexus-theme',
+      onRehydrateStorage: () => {
+        return (state) => {
+          if (state) {
+            applyThemeToDOM(state.currentTheme);
+          }
+        };
+      }
+    }
   )
 );
-
-// Применяем CSS переменные к DOM
-function applyThemeToDOM(theme: Theme) {
-  const root = document.documentElement;
-  Object.entries(theme.colors).forEach(([key, value]) => {
-    const cssVar = `--color-${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`;
-    root.style.setProperty(cssVar, value);
-  });
-}
