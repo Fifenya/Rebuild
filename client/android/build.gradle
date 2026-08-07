@@ -1,4 +1,4 @@
-// Top-level build file — здесь подключаем плагины через classpath (старый DSL)
+// Top-level build file
 
 buildscript {
     ext {
@@ -15,18 +15,19 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:8.2.1"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+        classpath("com.android.tools.build:gradle")
+        classpath("com.facebook.react:react-native-gradle-plugin")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin")
     }
 }
 
 allprojects {
     repositories {
         maven {
-            url "$rootDir/../node_modules/react-native/android"
+            url("$rootDir/../node_modules/react-native/android")
         }
         maven {
-            url "$rootDir/../node_modules/jsc-android/dist"
+            url("$rootDir/../node_modules/jsc-android/dist")
         }
         mavenCentral {
             content {
