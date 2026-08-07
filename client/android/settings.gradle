@@ -4,28 +4,14 @@ pluginManagement {
         mavenCentral()
         google()
     }
-    resolutionStrategy {
-        eachPlugin {
-            if (requested.id.id == "com.facebook.react") {
-                useModule("com.facebook.react:react-native-gradle-plugin:0.73.4")
-            }
-        }
-    }
-}
-
-dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
-    repositories {
-        mavenCentral()
-        google()
-    }
 }
 
 rootProject.name = "nexus-mobile"
+
+apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle")
+applyNativeModulesSettingsGradle(settings)
+
 include ':app'
 
-apply from: new File(
-    ["node", "--print", "require.resolve('@react-native-community/cli-platform-android/package.json')"].execute(null, rootDir).text.trim(),
-    "../native_modules.gradle"
-)
-applyNativeModulesSettingsGradle(settings)
+// Подключаем react-native-gradle-plugin из node_modules (он НЕ в Maven Central)
+includeBuild('../node_modules/@react-native/gradle-plugin')
