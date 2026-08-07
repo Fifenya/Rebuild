@@ -53,7 +53,9 @@ jobs:
 
       - name: Bundle JS for Android
         working-directory: client
-        run: npm run bundle:android
+        run: |
+          mkdir -p android/app/src/main/assets
+          npm run bundle:android
 
       - name: Make gradlew executable
         working-directory: client/android
