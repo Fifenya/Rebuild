@@ -1,109 +1,37 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-@layer base {
-  :root {
-    /* Переменные тем будут переопределяться динамически */
-    --bg-primary: #1a1a2e;
-    --bg-secondary: #252540;
-    --text-primary: #e2e2e2;
-    --text-secondary: #a0a0c0;
-    --accent: #5b6abf;
-    --accent-hover: #7b8adf;
-    --border: #3a3a5a;
-    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  }
-
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-
-  body {
-    background-color: var(--bg-primary);
-    color: var(--text-primary);
-    font-family: var(--font-family);
-    transition: background-color 0.2s, color 0.2s;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-
-  ::-webkit-scrollbar-track {
-    background: var(--bg-secondary);
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background: var(--accent);
-    border-radius: 3px;
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: var(--accent-hover);
-  }
+:root {
+  --color-background: #0a0a0a;
+  --color-background-secondary: #1a1a1a;
+  --color-surface: #252525;
+  --color-accent: #dc2626;
+  --color-accent-hover: #ef4444;
+  --color-text: #ffffff;
+  --color-text-muted: #a1a1aa;
+  --color-border: #2e2e2e;
+  --color-error: #dc2626;
+  --color-success: #10b981;
 }
 
-@layer components {
-  .nexus-container {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
-  }
-
-  .nexus-card {
-    @apply bg-[var(--bg-secondary)] rounded-xl border border-[var(--border)] p-4;
-  }
-
-  .nexus-input {
-    @apply w-full bg-[var(--bg-input)] text-[var(--text-primary)] border border-[var(--border)] rounded-lg px-4 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent;
-  }
-
-  .nexus-btn {
-    @apply px-4 py-2 rounded-lg font-medium transition-colors transition-transform active:scale-95;
-  }
-
-  .nexus-btn-primary {
-    @apply nexus-btn bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)];
-  }
-
-  .nexus-btn-secondary {
-    @apply nexus-btn bg-[var(--bg-third)] text-[var(--text-primary)] hover:bg-[var(--border)];
-  }
-
-  .nexus-btn-danger {
-    @apply nexus-btn bg-red-500 text-white hover:bg-red-600;
-  }
-
-  .nexus-avatar {
-    @apply w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold;
-    background: linear-gradient(135deg, var(--accent), var(--accent-hover));
-  }
-
-  .nexus-avatar img {
-    @apply w-full h-full rounded-full object-cover;
-  }
-
-  .nexus-message-own {
-    @apply bg-[var(--message-own)] text-[var(--message-own-text)] rounded-2xl rounded-br-none px-4 py-2 max-w-[70%] self-end;
-  }
-
-  .nexus-message-other {
-    @apply bg-[var(--message-other)] text-[var(--message-other-text)] rounded-2xl rounded-bl-none px-4 py-2 max-w-[70%] self-start;
-  }
+body {
+  background-color: var(--color-background);
+  color: var(--color-text);
+  font-family: 'Inter', -apple-system, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-@layer utilities {
-  .animate-message-in {
-    animation: messageSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
+/* Пример использования в компонентах */
+.nexus-button {
+  background-color: var(--color-accent);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
 
-  @keyframes messageSlideIn {
-    from {
-      opacity: 0;
+.nexus-button:hover {
+  background-color: var(--color-accent-hover);
+}      opacity: 0;
       transform: translateY(10px) scale(0.95);
     }
     to {
