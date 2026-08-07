@@ -49,7 +49,7 @@ linux:
   icon: assets/icon.png
   category: Network;Chat;InstantMessaging
   artifactName: "Nexus-${version}-${arch}.${ext}"
-  maintainer: "Nexus Team <nexus@example.com>"
+  maintainer: "Nexus Team <NexusTeamMess@gmail.com>"
   vendor: "Nexus Team"
   synopsis: Secure messenger
   description: |
