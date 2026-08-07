@@ -10,23 +10,38 @@ jobs:
   build:
     runs-on: ubuntu-latest
     
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    
     steps:
     - uses: actions/checkout@v4
     
-    - name: Setup Node.js
+    - name: Setup Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
       with:
-        node-version: '20'
+        node-version: ${{ matrix.node-version }}
         cache: 'npm'
     
-    - name: Install dependencies
-      run: npm run install:all
+    - name: Install root dependencies
+      run: npm install
+    
+    - name: Install backend dependencies
+      run: cd packages/backend && npm install
+    
+    - name: Install frontend dependencies
+      run: cd packages/frontend && npm install
+    
+    - name: Install client dependencies
+      run: cd client && npm install
     
     - name: Lint
-      run: npm run lint || echo "No lint script"
+      run: npm run lint || echo "No lint script configured"
     
     - name: Build Frontend
       run: npm run build:frontend
+      continue-on-error: false
     
     - name: Build Backend
       run: npm run build:backend
+      continue-on-error: false
