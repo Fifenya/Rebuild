@@ -8,7 +8,7 @@ pluginManagement {
         eachPlugin {
             switch (requested.id.id) {
                 case "com.facebook.react":
-                    useModule("com.facebook.react:react-native-gradle-plugin:+")
+                    useModule("com.facebook.react:react-native-gradle-plugin")
                     break
             }
         }
