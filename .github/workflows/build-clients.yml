@@ -1,0 +1,221 @@
+name: Build Clients
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  # ─────────────────────────────────────────────────────────
+  # Android APK
+  # ─────────────────────────────────────────────────────────
+  build-android:
+    name: Build APK (Android)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: client/package-lock.json
+
+      - name: Install dependencies
+        working-directory: client
+        run: npm install
+
+      - name: Bundle JS for Android
+        working-directory: client
+        run: npm run bundle:android
+
+      - name: Make gradlew executable
+        working-directory: client/android
+        run: chmod +x gradlew
+
+      - name: Build Debug APK
+        working-directory: client/android
+        run: ./gradlew assembleDebug
+
+      - name: Build Release APK
+        working-directory: client/android
+        run: ./gradlew assembleRelease
+
+      - name: Upload APK artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nexus-android-apk
+          path: |
+            client/android/app/build/outputs/apk/debug/*.apk
+            client/android/app/build/outputs/apk/release/*.apk
+
+      - name: Attach to Release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            client/android/app/build/outputs/apk/debug/*.apk
+            client/android/app/build/outputs/apk/release/*.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ─────────────────────────────────────────────────────────
+  # Linux .deb + .AppImage
+  # ─────────────────────────────────────────────────────────
+  build-linux:
+    name: Build DEB (Linux)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: packages/frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: packages/frontend
+        run: npm install
+
+      - name: Build frontend
+        working-directory: packages/frontend
+        run: npm run build
+
+      - name: Install desktop dependencies
+        working-directory: packages/desktop
+        run: npm install
+
+      - name: Install Linux build tools
+        run: sudo apt-get install -y rpm fakeroot
+
+      - name: Build Linux packages
+        working-directory: packages/desktop
+        run: npm run dist:linux
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Linux artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nexus-linux
+          path: |
+            packages/desktop/dist/*.deb
+            packages/desktop/dist/*.AppImage
+
+      - name: Attach to Release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            packages/desktop/dist/*.deb
+            packages/desktop/dist/*.AppImage
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ─────────────────────────────────────────────────────────
+  # Windows .exe
+  # ─────────────────────────────────────────────────────────
+  build-windows:
+    name: Build EXE (Windows)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: packages/frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: packages/frontend
+        run: npm install
+
+      - name: Build frontend
+        working-directory: packages/frontend
+        run: npm run build
+
+      - name: Install desktop dependencies
+        working-directory: packages/desktop
+        run: npm install
+
+      - name: Build Windows installer
+        working-directory: packages/desktop
+        run: npm run dist:windows
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nexus-windows
+          path: packages/desktop/dist/*.exe
+
+      - name: Attach to Release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: packages/desktop/dist/*.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ─────────────────────────────────────────────────────────
+  # macOS .dmg (бонус)
+  # ─────────────────────────────────────────────────────────
+  build-mac:
+    name: Build DMG (macOS)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: packages/frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: packages/frontend
+        run: npm install
+
+      - name: Build frontend
+        working-directory: packages/frontend
+        run: npm run build
+
+      - name: Install desktop dependencies
+        working-directory: packages/desktop
+        run: npm install
+
+      - name: Build macOS app
+        working-directory: packages/desktop
+        run: npm run dist:mac
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload macOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nexus-macos
+          path: packages/desktop/dist/*.dmg
+
+      - name: Attach to Release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: packages/desktop/dist/*.dmg
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
