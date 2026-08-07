@@ -28,12 +28,28 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: client/package-lock.json
 
       - name: Install dependencies
         working-directory: client
         run: npm install
+
+      # ───────────────────────────────────────────────────
+      # Восстанавливаем keystore из секретов GitHub
+      # ───────────────────────────────────────────────────
+      - name: Decode release keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 --decode > client/android/app/release.keystore
+            echo "storeFile=release.keystore"                          >  client/android/keystore.properties
+            echo "storePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" >> client/android/keystore.properties
+            echo "keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}"             >> client/android/keystore.properties
+            echo "keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}"       >> client/android/keystore.properties
+            echo "✅ Keystore восстановлен, release будет подписан"
+          else
+            echo "⚠️ Секрет ANDROID_KEYSTORE_BASE64 не задан — release будет с debug-подписью"
+          fi
 
       - name: Bundle JS for Android
         working-directory: client
@@ -43,13 +59,16 @@ jobs:
         working-directory: client/android
         run: chmod +x gradlew
 
-      - name: Build Debug APK
+      - name: Build APK (debug + release)
         working-directory: client/android
-        run: ./gradlew assembleDebug
+        run: ./gradlew assembleDebug assembleRelease
 
-      - name: Build Release APK
-        working-directory: client/android
-        run: ./gradlew assembleRelease
+      - name: Verify release signature
+        working-directory: client/android/app/build/outputs/apk/release
+        run: |
+          ls -la
+          # Проверим, что APK подписан
+          keytool -printcert -jarfile app-release.apk || true
 
       - name: Upload APK artifacts
         uses: actions/upload-artifact@v4
@@ -82,8 +101,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: packages/frontend/package-lock.json
 
       - name: Install frontend dependencies
         working-directory: packages/frontend
@@ -137,8 +154,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: packages/frontend/package-lock.json
 
       - name: Install frontend dependencies
         working-directory: packages/frontend
@@ -173,7 +188,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # ─────────────────────────────────────────────────────────
-  # macOS .dmg (бонус)
+  # macOS .dmg
   # ─────────────────────────────────────────────────────────
   build-mac:
     name: Build DMG (macOS)
@@ -185,8 +200,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: packages/frontend/package-lock.json
 
       - name: Install frontend dependencies
         working-directory: packages/frontend
