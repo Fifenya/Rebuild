@@ -2,8 +2,12 @@
   "name": "@nexus/desktop",
   "version": "1.0.0",
   "description": "Nexus Desktop — secure messenger",
+  "homepage": "https://github.com/Fifenya/Rebuild",
   "main": "main.js",
-  "author": "Nexus Team",
+  "author": {
+    "name": "Nexus Team",
+    "email": "nexus@example.com"
+  },
   "license": "MIT",
   "scripts": {
     "dev": "concurrently \"cd ../frontend && npm run dev\" \"wait-on http://localhost:5173 && electron .\"",
